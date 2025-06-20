@@ -1,0 +1,6 @@
+.env
+
+chatbot.db
+.env.*
+*.sqlite3
+*.log

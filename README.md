@@ -1,2 +1,1 @@
-# Emotional-ai-chat
-Flask + openai emotional ai chatbot
+# Emotional-AI

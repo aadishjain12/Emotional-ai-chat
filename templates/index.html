@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Emotional AI Chat</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #f0f9ff, #c2f0f7);
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 750px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .header {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .header span {
+      font-size: 28px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    input, select {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #chat {
+      margin-top: 20px;
+      max-height: 350px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .msg {
+      margin: 10px 0;
+    }
+
+    .user {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .agent {
+      font-style: italic;
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      🤖 Emotional AI Chat <span>💬</span>
+    </div>
+
+    <h2>Create Your Agent</h2>
+    <input type="text" id="agentName" placeholder="Agent Name">
+    <select id="agentEmotion">
+      <option value="Friendly">😄 Friendly</option>
+      <option value="Witty">😫 Witty</option>
+      <option value="Romantic">😍 Romantic</option>
+      <option value="Sad">😢 Sad</option>
+      <option value="Professional">💼 Professional</option>
+    </select>
+    <div style="text-align: center;">
+      <button onclick="createAgent()">Create Agent</button>
+    </div>
+
+    <h2>Chat</h2>
+    <div id="chat"></div>
+    <input type="text" id="messageInput" placeholder="Type your message here...">
+    <div style="text-align: center;">
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="toggleTheme()" id="themeToggle">🌞 Mode</button>
+    </div>
+  </div>
+
+  <script>
+    let conversation = [];
+
+    function createAgent() {
+      const name = document.getElementById("agentName").value;
+      const emotion = document.getElementById("agentEmotion").value;
+      fetch("/create_agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, emotion })
+      }).then(() => {
+        showTypingEffect(`${name} (${emotion}) agent created.`);
+      });
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const msg = input.value;
+      if (!msg.trim()) return;
+
+      conversation.push({ role: "user", content: msg });
+      document.getElementById("chat").innerHTML += `<div class='msg user'>You: ${msg}</div>`;
+      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+
+      try {
+        const res = await fetch("/send_message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg, conversation })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.reply) {
+          conversation.push({ role: "assistant", content: data.reply });
+          showTypingEffect(data.reply);
+        } else {
+          document.getElementById("chat").innerHTML += `<div class='msg agent'>Error: ${data.error || 'Unknown error'}</div>`;
+        }
+      } catch (error) {
+        document.getElementById("chat").innerHTML += `<div class='msg agent'>Fetch error: ${error.message}</div>`;
+      }
+
+      input.value = "";
+    }
+
+    function showTypingEffect(reply) {
+      const container = document.createElement("div");
+      container.className = "msg agent";
+      container.innerHTML = "AI: ";
+      document.getElementById("chat").appendChild(container);
+
+      let i = 0;
+      const interval = setInterval(() => {
+        container.innerHTML += reply.charAt(i);
+        i++;
+        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+        if (i >= reply.length) clearInterval(interval);
+      }, 20);
+    }
+
+    function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.classList.toggle('dark');
+  const toggleBtn = document.getElementById("themeToggle");
+  toggleBtn.textContent = isDark ? "🌚 Mode" : "🌞 Mode";
+}
+  </script>
+</body>
+</html>
