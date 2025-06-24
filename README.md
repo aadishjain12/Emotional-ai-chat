@@ -32,8 +32,6 @@ An interactive AI chatbot project that combines emotional tone control with a pe
 4. Set Environment Variable: `OPENAI_API_KEY`
 5. Expose port 5000
 
-## 📸 Preview
-
 
 ---
 
