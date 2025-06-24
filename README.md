@@ -34,7 +34,6 @@ An interactive AI chatbot project that combines emotional tone control with a pe
 
 ## 📸 Preview
 
-> _(Include a GIF or screenshot of the app if possible)_
 
 ---
 
